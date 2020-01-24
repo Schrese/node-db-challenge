@@ -4,6 +4,8 @@ const Projects = require('./projects-model.js');
 
 const Resources = require('./resources-model.js');
 
+const Tasks = require('./tasks-model.js');
+
 const router = express.Router();
 
 //---------------projects
@@ -20,6 +22,18 @@ router.get('/projects', (req, res) => {
         })
 })
 
+router.get('/projects/:id', (req, res) => {
+    const id = req.params.id;
+
+    Projects.getProjById(id)
+        .then(project => {
+            res.status(200).json(project);
+        })
+        .catch(err => {
+            console.log('error getting project by id', err)
+            res.status(500).json({ errorMessage: 'Could not find this project' })
+        })
+})
 
 //adds project
 router.post('/projects', (req, res) => {
@@ -52,25 +66,49 @@ router.get('/resources', (req, res) => {
 
 
 //adds resources
-// router.post('/resources', (req, res) => {
-//     const newRes = req.body;
+router.post('/resources', (req, res) => {
+    const newRes = req.body;
 
-//     Resources.insertProject(newRes)
-//         .then(resource => {
-//             res.status(201).json(resource)
-//         })
-//         .catch(err => {
-//             console.log('error creating resource', err)
-//             res.status(500).json({ errorMessage: 'Could not create a resource' })
-//         })
-// })
+    Resources.insertResource(newRes)
+        .then(resource => {
+            res.status(201).json(resource)
+        })
+        .catch(err => {
+            console.log('error creating resource', err)
+            res.status(500).json({ errorMessage: 'Could not create a resource' })
+        })
+})
 
 
 //----------------tasks
 
 //gets list of tasks with project name and project description
+router.get('/projects/:id/tasks', (req, res) => {
+    const id = req.params.id;
+
+    Projects.getProjTasks(id)
+        .then(tasksInfo => {
+            res.status(200).json(tasksInfo)
+        })
+        .catch(err => {
+            console.log('error getting tasks', err)
+            res.status(500).json({ errorMessage: 'Could not find tasks' })
+        })
+})
 
 //adds tasks
+router.post('/tasks', (req, res) => {
+    const newTask = req.body;
+    const id = req.params.id;
 
+    Tasks.createProjTasks(id, newTask)
+        .then(task => {
+            res.status(201).json(task);
+        })
+        .catch(err => {
+            console.log('error creating task', err)
+            res.status(500).json({ errorMessage: 'Could not create a new task' })
+        })
+})
 
 module.exports = router;
